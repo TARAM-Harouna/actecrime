@@ -25,44 +25,105 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            <form role="form" method="POST" action={{route('type_actes.store') }} enctype="multipart/form-data">
-                        @csrf
-                    <div class="mb-3">
-                        <label for="typeacte_id" class="form-label">Type d'Acte</label>
-                        <select class="form-select" id="typeacte_id" name="typeacte_id" required>
-                            <!-- Options du type d'acte -->
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="commentaire" class="form-label">Commentaire</label>
-                        <textarea class="form-control" id="commentaire" name="commentaire"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="lieu" class="form-label">Lieu</label>
-                        <input type="text" class="form-control" id="lieu" name="lieu" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="region" class="form-label">Région</label>
-                        <input type="text" class="form-control" id="region" name="region" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="date" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="date" name="date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="heure" class="form-label">Heure</label>
-                        <input type="time" class="form-control" id="heure" name="heure" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="latitude" class="form-label">Latitude</label>
-                        <input type="number" step="any" class="form-control" id="latitude" name="latitude">
-                    </div>
-                    <div class="mb-3">
-                        <label for="longitude" class="form-label">Longitude</label>
-                        <input type="number" step="any" class="form-control" id="longitude" name="longitude">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </form>
+            <!-- Formulaire -->
+<form role="form" method="POST" action="{{ route('type_actes.store') }}" enctype="multipart/form-data">
+    @csrf
+    <div class="mb-3">
+        <label for="typeacte_id" class="form-label">Type d'Acte</label>
+        <select class="form-select" id="typeacte_id" name="typeacte_id" required>
+            @foreach($typeactes as $typeacte)
+                <option value="{{ $typeacte->id }}">{{ $typeacte->nom }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="commentaire" class="form-label">Commentaire</label>
+        <textarea class="form-control" id="commentaire" name="commentaire"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="lieu" class="form-label">Lieu</label>
+        <input type="text" class="form-control" id="lieu" name="lieu" required>
+    </div>
+    <div class="mb-3">
+        <label for="region" class="form-label">Région</label>
+        <input type="text" class="form-control" id="region" name="region" required>
+    </div>
+    <div class="mb-3">
+        <label for="date" class="form-label">Date</label>
+        <input type="date" class="form-control" id="date" name="date" required>
+    </div>
+    <div class="mb-3">
+        <label for="heure" class="form-label">Heure</label>
+        <input type="time" class="form-control" id="heure" name="heure" required>
+    </div>
+    <div class="mb-12">
+        <iframe id="mapFrame" srcdoc='
+            <html>
+            <head>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+                <style>
+                    #map { height: 350px; width: 400px }
+                </style>
+            </head>
+            <body>
+                <div id="map"></div>
+                <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function(event) {
+                        var map = L.map("map").setView([0, 0], 2);
+
+                        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                            attribution: "&copy; OpenStreetMap contributors"
+                        }).addTo(map);
+
+                        var marker = L.marker([0, 0], { draggable: true }).addTo(map);
+
+                        marker.on("dragend", function(event) {
+                            var markerLatLng = marker.getLatLng();
+                            var latitude = markerLatLng.lat;
+                            var longitude = markerLatLng.lng;
+
+                            // Envoyer les valeurs de latitude et de longitude au parent
+                            window.parent.postMessage({ latitude: latitude, longitude: longitude }, "*");
+                        });
+                    });
+                </script>
+            </body>
+            </html>'
+        ></iframe>
+    </div>
+    <div class="mb-3">
+        <label for="latitude" class="form-label">Latitude</label>
+        <input type="number" step="any" class="form-control" id="latitude" name="latitude">
+    </div>
+    <div class="mb-3">
+        <label for="longitude" class="form-label">Longitude</label>
+        <input type="number" step="any" class="form-control" id="longitude" name="longitude">
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+<!-- Script pour récupérer les valeurs de latitude et de longitude depuis l'iframe -->
+<script>
+    // Ecouter le message provenant de l'iframe
+    window.addEventListener("message", function(event) {
+        if (event.origin !== "localhost") {
+            return;
+        }
+
+        // Récupérer les valeurs de latitude et de longitude depuis l'iframe
+        var latitude = event.data.latitude;
+        var longitude = event.data.longitude;
+
+        // Mettre à jour les champs de latitude et de longitude du formulaire
+        document.getElementById("latitude").value = latitude;
+        document.getElementById("longitude").value = longitude;
+    });
+</script>
+
+
+
+
             </div>
         </div>
     </div>
@@ -76,7 +137,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form role="form" method="POST" action={{route('type_actes.store') }} >
+                
+                <form role="form" method="POST" action="{{ route('type_actes.store') }}">
+                    @csrf
                     <div class="mb-3">
                         <label for="nom" class="form-label">Nom</label>
                         <input type="text" class="form-control" id="nom" name="nom" required>

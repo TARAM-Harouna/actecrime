@@ -36,14 +36,14 @@ class TypeActeController extends Controller
     public function store(Request $request)
     {
         // Validation des données reçues du formulaire
-        $validatedData = $request->validate([
-            'nom' => 'required',
-        ]);
+        
 
         // Création du type acte avec les données validées
-        TypeActe::create($validatedData);
+        TypeActe::create(
+           ["nom" => $request->nom] 
+        );
 
-        return redirect()->route('acte_crimes.index')->with('success', 'Le type acte a été créé avec succès.');
+        return redirect()->route('acte_crimes.index')->with('success', 'Le type acte a été créé avec succès..;');
     }
 }
 

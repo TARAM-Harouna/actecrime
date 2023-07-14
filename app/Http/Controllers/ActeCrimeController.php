@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Typeacte;
 use App\Models\ActeCrime;
 use Illuminate\Http\Request;
 
@@ -15,7 +15,8 @@ class ActeCrimeController extends Controller
     public function index()
     {
         $acteCrimes = ActeCrime::all();
-        return view('pages.tables', compact('acteCrimes'));
+        $typeactes = Typeacte::all();
+        return view('pages.tables', compact('acteCrimes', 'typeactes'));
     }
 
     /**
